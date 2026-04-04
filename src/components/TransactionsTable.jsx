@@ -1,11 +1,58 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useMemo } from 'react';
 import { AppContext } from '../context/AppContext';
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 
 const TransactionsTable = () => {
-  const { transactions } = useContext(AppContext);
+  const { transactions, searchTerm, setSearchTerm, filterType, setFilterType } = useContext(AppContext);
+  const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
 
-  // Helper to format currency
+  // Handle Sort
+  const requestSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Filter and Sort Data
+  const processedTransactions = useMemo(() => {
+    let processed = [...transactions];
+
+    // Filter by Search
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      processed = processed.filter(t => 
+        t.category.toLowerCase().includes(lowerSearch) ||
+        t.amount.toString().includes(lowerSearch)
+      );
+    }
+
+    // Filter by Type
+    if (filterType !== 'All') {
+      processed = processed.filter(t => t.type === filterType.toLowerCase());
+    }
+
+    // Sort
+    processed.sort((a, b) => {
+      if (sortConfig.key === 'amount') {
+        return sortConfig.direction === 'asc' 
+          ? a.amount - b.amount 
+          : b.amount - a.amount;
+      } else if (sortConfig.key === 'date') {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return sortConfig.direction === 'asc' 
+          ? dateA - dateB 
+          : dateB - dateA;
+      }
+      return 0;
+    });
+
+    return processed;
+  }, [transactions, searchTerm, filterType, sortConfig]);
+
+  // Format currency
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -13,7 +60,7 @@ const TransactionsTable = () => {
     }).format(value);
   };
 
-  // Helper to format date
+  // Format date
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-US', options);
@@ -21,24 +68,66 @@ const TransactionsTable = () => {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-      <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+      <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Transactions</h2>
-        {/* Step 6 placeholder: filters/search will go near here */}
+        
+        {/* Filters and Search */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 w-full sm:w-64 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm transition-all text-gray-800 dark:text-gray-200"
+            />
+          </div>
+          
+          <div className="relative flex items-center">
+            <SlidersHorizontal className="absolute left-3 h-4 w-4 text-gray-400" />
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="pl-10 pr-8 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm appearance-none text-gray-800 dark:text-gray-200 cursor-pointer"
+            >
+              <option value="All">All Types</option>
+              <option value="Income">Income</option>
+              <option value="Expense">Expense</option>
+            </select>
+          </div>
+        </div>
       </div>
       
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
             <tr className="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-sm border-b border-gray-100 dark:border-gray-700">
-              <th className="p-4 font-medium">Date</th>
+              <th 
+                className="p-4 font-medium cursor-pointer hover:text-gray-900 dark:hover:text-white group select-none"
+                onClick={() => requestSort('date')}
+              >
+                <div className="flex items-center gap-1">
+                  Date
+                  <ArrowUpDown className={`w-3 h-3 ${sortConfig.key === 'date' ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'} transition-opacity`} />
+                </div>
+              </th>
               <th className="p-4 font-medium">Category</th>
               <th className="p-4 font-medium">Type</th>
-              <th className="p-4 font-medium text-right">Amount</th>
+              <th 
+                className="p-4 font-medium cursor-pointer hover:text-gray-900 dark:hover:text-white group select-none flex justify-end items-center gap-1"
+                onClick={() => requestSort('amount')}
+              >
+                <ArrowUpDown className={`w-3 h-3 ${sortConfig.key === 'amount' ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'} transition-opacity`} />
+                Amount
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {transactions.length > 0 ? (
-              transactions.map((transaction) => (
+            {processedTransactions.length > 0 ? (
+              processedTransactions.map((transaction) => (
                 <tr 
                   key={transaction.id} 
                   className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors duration-150"
@@ -77,7 +166,7 @@ const TransactionsTable = () => {
             ) : (
               <tr>
                 <td colSpan="4" className="p-8 text-center text-gray-500 dark:text-gray-400">
-                  No transactions found.
+                  No matching transactions found.
                 </td>
               </tr>
             )}
