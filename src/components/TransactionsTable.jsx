@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContext';
 import { ArrowUpRight, ArrowDownRight, Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 
 const TransactionsTable = () => {
-  const { transactions, searchTerm, setSearchTerm, filterType, setFilterType } = useContext(AppContext);
+  const { transactions, searchTerm, setSearchTerm, filterType, setFilterType, role } = useContext(AppContext);
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
 
   // Handle Sort
@@ -69,7 +69,14 @@ const TransactionsTable = () => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
       <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Transactions</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Transactions</h2>
+          {role === 'Admin' && (
+            <button className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200">
+              + Add Transaction
+            </button>
+          )}
+        </div>
         
         {/* Filters and Search */}
         <div className="flex flex-col sm:flex-row gap-3">

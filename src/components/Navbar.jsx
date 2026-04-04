@@ -1,7 +1,10 @@
-import React from 'react';
-import { Wallet } from 'lucide-react';
+import React, { useContext } from 'react';
+import { Wallet, Shield } from 'lucide-react';
+import { AppContext } from '../context/AppContext';
 
 const Navbar = () => {
+  const { role, setRole } = useContext(AppContext);
+
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,9 +19,16 @@ const Navbar = () => {
           </div>
           
           <div className="flex items-center gap-4">
-            {/* Placeholder for role toggle to be added in Step 8 */}
-            <div className="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
-              Welcome back!
+            <div className="relative flex items-center">
+              <Shield className="absolute left-3 h-4 w-4 text-purple-500" />
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="pl-9 pr-8 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-sm font-medium appearance-none cursor-pointer"
+              >
+                <option value="Admin">Admin</option>
+                <option value="Viewer">Viewer</option>
+              </select>
             </div>
           </div>
         </div>
