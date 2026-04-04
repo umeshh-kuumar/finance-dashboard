@@ -2,6 +2,7 @@ import React from 'react';
 import SummaryCards from '../components/SummaryCards';
 import TransactionsTable from '../components/TransactionsTable';
 import Charts from '../components/Charts';
+import Insights from '../components/Insights';
 
 const Dashboard = () => {
   return (
@@ -22,8 +23,8 @@ const Dashboard = () => {
           </section>
 
           {/* Insights (Step 9) */}
-          <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 min-h-[300px] flex items-center justify-center text-gray-400">
-            Insights Placeholder
+          <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <Insights />
           </section>
         </div>
 
