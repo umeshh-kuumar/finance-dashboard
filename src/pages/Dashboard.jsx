@@ -1,5 +1,6 @@
 import React from 'react';
 import SummaryCards from '../components/SummaryCards';
+import TransactionsTable from '../components/TransactionsTable';
 
 const Dashboard = () => {
   return (
@@ -26,8 +27,8 @@ const Dashboard = () => {
         </div>
 
         {/* Bottom Section: Transactions Table (Step 5) */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 min-h-[400px] flex items-center justify-center text-gray-400">
-          Transactions Table Placeholder
+        <section>
+          <TransactionsTable />
         </section>
 
       </div>
