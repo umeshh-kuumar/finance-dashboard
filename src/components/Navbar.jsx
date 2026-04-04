@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
-import { Wallet, Shield } from 'lucide-react';
+import { Wallet, Shield, Sun, Moon } from 'lucide-react';
 import { AppContext } from '../context/AppContext';
 
 const Navbar = () => {
-  const { role, setRole } = useContext(AppContext);
+  const { role, setRole, isDarkMode, setIsDarkMode } = useContext(AppContext);
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10 transition-colors duration-200">
@@ -19,6 +19,13 @@ const Navbar = () => {
           </div>
           
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+              aria-label="Toggle Dark Mode"
+            >
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
             <div className="relative flex items-center">
               <Shield className="absolute left-3 h-4 w-4 text-purple-500" />
               <select

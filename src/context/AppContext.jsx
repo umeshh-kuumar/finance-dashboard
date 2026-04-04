@@ -15,6 +15,12 @@ export const AppProvider = ({ children }) => {
     return localStorage.getItem('finance_role') || 'Admin'; // Default role Admin for now
   });
 
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('finance_dark_mode');
+    if (saved !== null) return JSON.parse(saved);
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All'); // All, income, expense
 
@@ -27,6 +33,15 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem('finance_role', role);
   }, [role]);
 
+  useEffect(() => {
+    localStorage.setItem('finance_dark_mode', JSON.stringify(isDarkMode));
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
   return (
     <AppContext.Provider
       value={{
@@ -37,7 +52,9 @@ export const AppProvider = ({ children }) => {
         searchTerm,
         setSearchTerm,
         filterType,
-        setFilterType
+        setFilterType,
+        isDarkMode,
+        setIsDarkMode
       }}
     >
       {children}
