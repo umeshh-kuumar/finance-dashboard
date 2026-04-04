@@ -1,4 +1,5 @@
 import React from 'react';
+import SummaryCards from '../components/SummaryCards';
 
 const Dashboard = () => {
   return (
@@ -6,9 +7,9 @@ const Dashboard = () => {
       {/* Grid Layout for the entire dashboard */}
       <div className="grid grid-cols-1 gap-8">
         
-        {/* Placeholder: Summary Cards (Step 4) */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 min-h-[120px] flex items-center justify-center text-gray-400">
-          Summary Cards Placeholder
+        {/* Step 4: Summary Cards */}
+        <section>
+          <SummaryCards />
         </section>
 
         {/* Middle Section: Charts & Insights */}
