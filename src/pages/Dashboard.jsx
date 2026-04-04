@@ -1,6 +1,7 @@
 import React from 'react';
 import SummaryCards from '../components/SummaryCards';
 import TransactionsTable from '../components/TransactionsTable';
+import Charts from '../components/Charts';
 
 const Dashboard = () => {
   return (
@@ -16,8 +17,8 @@ const Dashboard = () => {
         {/* Middle Section: Charts & Insights */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Charts (Step 7) */}
-          <section className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 min-h-[300px] flex items-center justify-center text-gray-400">
-            Charts Placeholder
+          <section className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+            <Charts />
           </section>
 
           {/* Insights (Step 9) */}
