@@ -1,65 +1,120 @@
-import React, { useContext, useMemo } from 'react'
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { AppContext } from '../../context';
+import React, { useContext, useMemo } from "react";
+import { AppContext } from "../../context";
+import { PieChart } from "@mui/x-charts/PieChart";
 
-const COLORS = ['#aa3bff', '#4f46e5', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
+const COLORS = [
+  "#aa3bff",
+  "#4f46e5",
+  "#ec4899",
+  "#f59e0b",
+  "#10b981",
+  "#3b82f6",
+];
 
-const customTooltipStyle = {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    border: '1px solid #e5e7eb',
-    borderRadius: '0.75rem',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-    fontWeight: '500'
-};
+const getChartSx = (isDarkMode) => ({
+  "& .MuiChartsLegend-label": {
+    fill: isDarkMode ? "#d1d5db" : "#6b7280",
+    fontSize: "12px !important",
+  },
+  "& .MuiChartsTooltip-root": {
+    backgroundColor: isDarkMode
+      ? "rgba(31, 41, 55, 0.95)"
+      : "rgba(255, 255, 255, 0.95)",
+    border: `1px solid ${isDarkMode ? "#374151" : "#e5e7eb"}`,
+    borderRadius: "0.75rem",
+    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+    color: isDarkMode ? "#f9fafb" : "#111827",
+    fontWeight: 500,
+  },
+});
+
+const EmptyState = () => (
+  <div className="flex items-center justify-center h-full text-gray-400">
+    No data available
+  </div>
+);
 
 const Piechart = () => {
-    const { transactions } = useContext(AppContext);
+  const { transactions, isDarkMode } = useContext(AppContext);
+  const chartSx = useMemo(() => getChartSx(isDarkMode), [isDarkMode]);
 
-    const categorySpendingData = useMemo(() => {
-        const expenses = transactions.filter(t => t.type === 'expense');
-        const grouped = {};
+  const categorySpendingData = useMemo(() => {
+    const grouped = transactions
+      .filter((t) => t.type === "expense")
+      .reduce((acc, { category, amount }) => {
+        acc[category] = (acc[category] ?? 0) + Number(amount);
+        return acc;
+      }, {});
 
-        expenses.forEach(t => {
-            if (!grouped[t.category]) {
-                grouped[t.category] = 0;
-            }
-            grouped[t.category] += Number(t.amount);
-        });
+    return Object.entries(grouped)
+      .map(([label, value], index) => ({
+        id: index,
+        label,
+        value,
+        color: COLORS[index % COLORS.length],
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, [transactions]);
 
-        return Object.entries(grouped)
-            .map(([name, value]) => ({ name, value }))
-            .sort((a, b) => b.value - a.value); // Sort descending
-    }, [transactions]);
+  const total = useMemo(
+    () => categorySpendingData.reduce((s, d) => s + d.value, 0),
+    [categorySpendingData]
+  );
 
-    return (
-        <div className="flex flex-col h-[300px] w-full">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">Spending by Category</h3>
-            <div className="flex-1 w-full relative">
-                <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                        <Pie
-                            data={categorySpendingData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                        >
-                            {categorySpendingData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                        </Pie>
-                        <Tooltip
-                            contentStyle={customTooltipStyle}
-                            formatter={(value) => [`$${value}`, 'Amount']}
-                        />
-                    </PieChart>
-                </ResponsiveContainer>
-            </div>
+  return (
+    <div className="flex flex-col w-full">
+      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
+        Spending by Category
+      </h3>
+
+      {categorySpendingData.length > 0 ? (
+        <div className="flex flex-row items-center w-full">
+
+          {/* ── Pie (left) ── */}
+          <div className="flex-shrink-0">
+            <PieChart
+              series={[
+                {
+                  data: categorySpendingData,
+                  innerRadius: 40,
+                  cx: 110,
+                  cy: 110,
+                  arcLabel: (p) =>
+                    `${((p.value / total) * 100).toFixed(0)}%`,
+                  arcLabelMinAngle: 20,
+                  valueFormatter: ({ value }) =>
+                    `₹${value.toLocaleString()}`,
+                },
+              ]}
+              width={235}
+              height={235}
+              margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+              sx={chartSx}
+              slotProps={{ legend: { hidden: true } }} // 👈 hide built-in legend
+            />
+          </div>
+
+
+          <div className="flex flex-col flex-wrap gap-y-1 gap-x-2 ml-4 max-h-52 overflow-hidden">
+            {categorySpendingData.map((item) => (
+              <div key={item.id} className="flex items-center gap-2 min-w-[120px]">
+                <span
+                  className="flex-shrink-0 w-2.5 h-2.5 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                />
+                <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
+
         </div>
-    )
-}
+      ) : (
+        <EmptyState />
+      )}
+    </div>
+  );
+};
 
-export default Piechart
+export default Piechart;

@@ -1,138 +1,137 @@
 import React, { useContext, useMemo } from 'react';
 import { AppContext } from '../../context';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as LineTooltip, ResponsiveContainer,
-  BarChart, Bar, Tooltip as BarTooltip, Legend, Cell
-} from 'recharts';
+import { LineChart } from '@mui/x-charts/LineChart';
 
-const COLORS = ['#aa3bff', '#4f46e5', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
+const getChartSx = (isDarkMode) => ({
+  '& .MuiLineElement-root:nth-of-type(1)': { strokeWidth: 3 },
+  '& .MuiLineElement-root:nth-of-type(2)': { strokeWidth: 3 },
+  '& .MuiMarkElement-root': {
+    fill: '#fff',
+    strokeWidth: 2,
+  },
+  '& .MuiChartsAxis-bottom .MuiChartsAxis-line, & .MuiChartsAxis-left .MuiChartsAxis-line, & .MuiChartsAxis-right .MuiChartsAxis-line': {
+    stroke: isDarkMode ? '#4b5563' : '#e5e7eb',
+  },
+  '& .MuiChartsAxis-bottom .MuiChartsAxis-tick, & .MuiChartsAxis-left .MuiChartsAxis-tick, & .MuiChartsAxis-right .MuiChartsAxis-tick': {
+    stroke: isDarkMode ? '#4b5563' : '#e5e7eb',
+  },
+  '& .MuiChartsAxis-bottom .MuiChartsAxis-tickLabel, & .MuiChartsAxis-left .MuiChartsAxis-tickLabel, & .MuiChartsAxis-right .MuiChartsAxis-tickLabel': {
+    fill: '#9ca3af',
+    fontSize: 12,
+  },
+  '& .MuiChartsGrid-vertical line': { stroke: 'transparent' },
+  '& .MuiChartsGrid-horizontal line': {
+    stroke: isDarkMode ? '#374151' : '#e5e7eb',
+    strokeDasharray: '3 3',
+  },
+  '& .MuiChartsLegend-label': {
+    fill: isDarkMode ? '#d1d5db' : '#6b7280',
+    fontSize: '12px !important',
+  },
+});
 
-const Charts = () => {
-  const { transactions } = useContext(AppContext);
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  // Prepare data for Balance Trend (Line Chart)
-  const balanceTrendData = useMemo(() => {
-    // Sort transactions by date first
-    const sorted = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
-    let currentBalance = 0;
+const formatMonthLabel = (date) => `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
 
-    // Group by date to handle multiple transactions per day
-    const groupedByDate = {};
+const getMonthlySeries = (transactions) => {
+  const monthTotals = new Map();
 
-    sorted.forEach(t => {
-      if (!groupedByDate[t.date]) {
-        groupedByDate[t.date] = { date: t.date, net: 0 };
-      }
-      const amt = Number(t.amount);
-      groupedByDate[t.date].net += t.type === 'income' ? amt : -amt;
-    });
+  transactions.forEach(({ date, amount, type }) => {
+    const parsedDate = new Date(date);
+    if (Number.isNaN(parsedDate.getTime())) return;
 
-    return Object.values(groupedByDate).map(day => {
-      currentBalance += day.net;
-      return {
-        date: new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        balance: currentBalance
-      };
-    });
-  }, [transactions]);
+    const monthKey = `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}`;
+    if (!monthTotals.has(monthKey)) {
+      monthTotals.set(monthKey, {
+        date: parsedDate,
+        income: 0,
+        expense: 0,
+      });
+    }
 
-  // Prepare data for Spending by Category (Bar Chart)
-  const categorySpendingData = useMemo(() => {
-    const expenses = transactions.filter(t => t.type === 'expense');
-    const grouped = {};
+    const totals = monthTotals.get(monthKey);
+    if (type === 'income') totals.income += Number(amount);
+    if (type === 'expense') totals.expense += Number(amount);
+  });
 
-    expenses.forEach(t => {
-      if (!grouped[t.category]) {
-        grouped[t.category] = 0;
-      }
-      grouped[t.category] += Number(t.amount);
-    });
+  const sortedMonths = Array.from(monthTotals.values()).sort((a, b) => a.date - b.date);
+  const labels = sortedMonths.map((item) => formatMonthLabel(item.date));
+  const incomeData = sortedMonths.map((item) => item.income);
+  const expenseData = sortedMonths.map((item) => item.expense);
 
-    return Object.entries(grouped)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value); // Sort descending
-  }, [transactions]);
+  return { labels, incomeData, expenseData };
+};
 
-  // Custom tooltips styling
-  const customTooltipStyle = {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    border: '1px solid #e5e7eb',
-    borderRadius: '0.75rem',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-    fontWeight: '500'
-  };
+const EmptyState = () => (
+  <div className="flex items-center justify-center h-full text-gray-400">
+    No data available
+  </div>
+);
+
+const BiaxialLineChart = () => {
+  const { transactions, isDarkMode } = useContext(AppContext);
+  const chartSx = useMemo(() => getChartSx(isDarkMode), [isDarkMode]);
+
+  const { labels, incomeData, expenseData } = useMemo(
+    () => getMonthlySeries(transactions),
+    [transactions]
+  );
+
+  const series = useMemo(
+    () => [
+      {
+        data: incomeData,
+        label: 'Income',
+        yAxisId: 'leftAxisId',
+        color: '#aa3bff',
+        valueFormatter: (v) => `₹${v.toLocaleString()}`,
+      },
+      {
+        data: expenseData,
+        label: 'Expense',
+        yAxisId: 'rightAxisId',
+        color: '#f97316',
+        valueFormatter: (v) => `₹${v.toLocaleString()}`,
+      },
+    ],
+    [incomeData, expenseData]
+  );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
-      {/* Balance Trend */}
-      <div className="flex flex-col h-[300px] w-full">
-        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">Balance Trend</h3>
-        <div className="flex-1 w-full relative">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={balanceTrendData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:stroke-gray-700" />
-              <XAxis
-                dataKey="date"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: '#9ca3af' }}
-                dy={10}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: '#9ca3af' }}
-                tickFormatter={(value) => `$${value}`}
-                dx={-10}
-              />
-              <LineTooltip contentStyle={customTooltipStyle} formatter={(value) => [`$${value}`, 'Balance']} />
-              <Line
-                type="monotone"
-                dataKey="balance"
-                stroke="#aa3bff"
-                strokeWidth={3}
-                dot={{ r: 4, strokeWidth: 2, fill: '#fff' }}
-                activeDot={{ r: 6, fill: '#aa3bff' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Spending by Category */}
-      <div className="flex flex-col h-[300px] w-full">
-        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">Spending by Category</h3>
-        <div className="flex-1 w-full relative">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={categorySpendingData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" className="dark:stroke-gray-700" />
-              <XAxis
-                type="number"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: '#9ca3af' }}
-                tickFormatter={(value) => `$${value}`}
-              />
-              <YAxis
-                dataKey="name"
-                type="category"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: '#9ca3af' }}
-                width={80}
-              />
-              <BarTooltip contentStyle={customTooltipStyle} cursor={{ fill: 'transparent' }} formatter={(value) => [`$${value}`, 'Amount']} />
-              <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                {categorySpendingData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+    <div className="flex flex-col h-[300px]">
+      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
+        Income vs Expense
+      </h3>
+      <div className="flex-1 w-full">
+        {labels.length > 0 ? (
+          <LineChart
+            series={series}
+            xAxis={[{ scaleType: 'point', data: labels, height: 28 }]}
+            yAxis={[
+              {
+                id: 'leftAxisId',
+                width: 60,
+                valueFormatter: (v) => `₹${(v / 1000).toFixed(0)}k`,
+              },
+              {
+                id: 'rightAxisId',
+                position: 'right',
+                width: 60,
+                valueFormatter: (v) => `₹${(v / 1000).toFixed(0)}k`,
+              },
+            ]}
+            height={240}
+            margin={{ top: 10, right: 70, bottom: 20, left: 60 }}
+            slotProps={{ legend: { position: { vertical: 'top', horizontal: 'right' } } }}
+            sx={chartSx}
+          />
+        ) : (
+          <EmptyState />
+        )}
       </div>
     </div>
   );
 };
 
-export default Charts;
+export default BiaxialLineChart;
