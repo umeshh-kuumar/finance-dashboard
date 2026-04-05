@@ -9,7 +9,7 @@ const Navbar = () => {
     <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 md:hidden">
             <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
               <Wallet className="w-6 h-6 text-purple-600 dark:text-purple-300" />
             </div>
@@ -17,6 +17,8 @@ const Navbar = () => {
               FinanceDash
             </span>
           </div>
+          {/* Spacer for md screens where logo is hidden */}
+          <div className="hidden md:block"></div>
           
           <div className="flex items-center gap-4">
             <button
