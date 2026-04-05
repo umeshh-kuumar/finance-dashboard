@@ -1,22 +1,33 @@
 import React, { useContext } from 'react';
-import { Wallet, Shield, Sun, Moon } from 'lucide-react';
+import { Wallet, Shield, Sun, Moon, Menu, X } from 'lucide-react';
 import { AppContext } from '../../context';
 
 const Navbar = () => {
-  const { role, setRole, isDarkMode, setIsDarkMode } = useContext(AppContext);
+  const { role, setRole, isDarkMode, setIsDarkMode, isMobileMenuOpen, setIsMobileMenuOpen } = useContext(AppContext);
 
   return (
     <nav className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl shadow-[0_1px_0_rgba(255,255,255,0.4)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)] border-b border-gray-200/50 dark:border-gray-800/50 sticky top-0 z-10 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+            aria-label="Toggle Menu"
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+
+          {/* Logo for Mobile */}
           <div className="flex items-center gap-2 md:hidden">
             <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
               <Wallet className="w-6 h-6 text-purple-600 dark:text-purple-300" />
             </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400">
+            <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400">
               FinanceDash
             </span>
           </div>
+
           {/* Spacer for md screens where logo is hidden */}
           <div className="hidden md:block"></div>
 
