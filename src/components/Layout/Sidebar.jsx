@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Home, PieChart, CreditCard, Wallet } from 'lucide-react';
-import { AppContext } from '../../context/AppContext';
+import { AppContext } from '../../context';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },

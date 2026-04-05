@@ -1,11 +1,13 @@
-import React, { useContext } from 'react';
+import React, { useContext, Suspense, lazy } from 'react';
 import './App.css';
 import Navbar from './components/Layout/Navbar';
-import Dashboard from './pages/Dashboard';
 import Sidebar from './components/Layout/Sidebar';
-import Insights from './pages/Insights';
-import Transaction from './pages/Transaction';
-import { AppContext } from './context/AppContext';
+import { AppContext } from './context';
+
+// Lazy load pages for code splitting
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Insights = lazy(() => import('./pages/Insights'));
+const Transaction = lazy(() => import('./pages/Transaction'));
 
 function App() {
   const { activePage } = useContext(AppContext);
@@ -29,7 +31,9 @@ function App() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar />
         <div className="flex-1 overflow-y-auto">
-          {renderPage()}
+          <Suspense fallback={<div className="flex items-center justify-center h-full">Loading...</div>}>
+            {renderPage()}
+          </Suspense>
         </div>
       </div>
     </div>

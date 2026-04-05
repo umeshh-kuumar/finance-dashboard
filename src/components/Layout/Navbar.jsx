@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Wallet, Shield, Sun, Moon } from 'lucide-react';
-import { AppContext } from '../../context/AppContext';
+import { AppContext } from '../../context';
 
 const Navbar = () => {
   const { role, setRole, isDarkMode, setIsDarkMode } = useContext(AppContext);

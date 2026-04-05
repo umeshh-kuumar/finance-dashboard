@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from 'react';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from '../../context';
 import { Wallet, TrendingUp, TrendingDown } from 'lucide-react';
 
 const SummaryCards = () => {

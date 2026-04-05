@@ -1,7 +1,6 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { mockTransactions } from '../data/mockData';
-
-export const AppContext = createContext();
+import { AppContext } from './context';
 
 export const AppProvider = ({ children }) => {
   // Load data from localStorage or use mockData

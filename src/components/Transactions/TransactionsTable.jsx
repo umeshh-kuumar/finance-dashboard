@@ -1,5 +1,5 @@
 import React, { useContext, useState, useMemo } from 'react';
-import { AppContext } from '../../context/AppContext';
+import { AppContext } from '../../context';
 import { ArrowUpRight, ArrowDownRight, Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 
 const TransactionsTable = () => {
