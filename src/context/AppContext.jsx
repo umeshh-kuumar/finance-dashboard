@@ -23,6 +23,7 @@ export const AppProvider = ({ children }) => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All'); // All, income, expense
+  const [activePage, setActivePage] = useState('dashboard');
 
   // Save to localStorage when state changes
   useEffect(() => {
@@ -54,7 +55,9 @@ export const AppProvider = ({ children }) => {
         filterType,
         setFilterType,
         isDarkMode,
-        setIsDarkMode
+        setIsDarkMode,
+        activePage,
+        setActivePage
       }}
     >
       {children}

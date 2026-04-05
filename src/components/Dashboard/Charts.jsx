@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from 'react';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from '../../context/AppContext';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as LineTooltip, ResponsiveContainer,
   BarChart, Bar, Tooltip as BarTooltip, Legend, Cell
@@ -15,10 +15,10 @@ const Charts = () => {
     // Sort transactions by date first
     const sorted = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
     let currentBalance = 0;
-    
+
     // Group by date to handle multiple transactions per day
     const groupedByDate = {};
-    
+
     sorted.forEach(t => {
       if (!groupedByDate[t.date]) {
         groupedByDate[t.date] = { date: t.date, net: 0 };
@@ -40,7 +40,7 @@ const Charts = () => {
   const categorySpendingData = useMemo(() => {
     const expenses = transactions.filter(t => t.type === 'expense');
     const grouped = {};
-    
+
     expenses.forEach(t => {
       if (!grouped[t.category]) {
         grouped[t.category] = 0;
@@ -71,28 +71,28 @@ const Charts = () => {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={balanceTrendData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:stroke-gray-700" />
-              <XAxis 
-                dataKey="date" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fontSize: 12, fill: '#9ca3af' }} 
-                dy={10} 
+              <XAxis
+                dataKey="date"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: '#9ca3af' }}
+                dy={10}
               />
-              <YAxis 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fontSize: 12, fill: '#9ca3af' }} 
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: '#9ca3af' }}
                 tickFormatter={(value) => `$${value}`}
                 dx={-10}
               />
               <LineTooltip contentStyle={customTooltipStyle} formatter={(value) => [`$${value}`, 'Balance']} />
-              <Line 
-                type="monotone" 
-                dataKey="balance" 
-                stroke="#aa3bff" 
-                strokeWidth={3} 
-                dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} 
-                activeDot={{ r: 6, fill: '#aa3bff' }} 
+              <Line
+                type="monotone"
+                dataKey="balance"
+                stroke="#aa3bff"
+                strokeWidth={3}
+                dot={{ r: 4, strokeWidth: 2, fill: '#fff' }}
+                activeDot={{ r: 6, fill: '#aa3bff' }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -106,19 +106,19 @@ const Charts = () => {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={categorySpendingData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" className="dark:stroke-gray-700" />
-              <XAxis 
+              <XAxis
                 type="number"
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fontSize: 12, fill: '#9ca3af' }} 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: '#9ca3af' }}
                 tickFormatter={(value) => `$${value}`}
               />
-              <YAxis 
-                dataKey="name" 
+              <YAxis
+                dataKey="name"
                 type="category"
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fontSize: 12, fill: '#9ca3af' }} 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: '#9ca3af' }}
                 width={80}
               />
               <BarTooltip contentStyle={customTooltipStyle} cursor={{ fill: 'transparent' }} formatter={(value) => [`$${value}`, 'Amount']} />
