@@ -1,10 +1,10 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useMemo, useState, useEffect } from 'react';
 import { AppContext } from '../../context';
 import { LineChart } from '@mui/x-charts/LineChart';
 
-const getChartSx = (isDarkMode) => ({
-  '& .MuiLineElement-root:nth-of-type(1)': { strokeWidth: 3 },
-  '& .MuiLineElement-root:nth-of-type(2)': { strokeWidth: 3 },
+const getChartSx = (isDarkMode, isMobile) => ({
+  '& .MuiLineElement-root:nth-of-type(1)': { strokeWidth: isMobile ? 2 : 3 },
+  '& .MuiLineElement-root:nth-of-type(2)': { strokeWidth: isMobile ? 2 : 3 },
   '& .MuiMarkElement-root': {
     fill: '#fff',
     strokeWidth: 2,
@@ -17,7 +17,7 @@ const getChartSx = (isDarkMode) => ({
   },
   '& .MuiChartsAxis-bottom .MuiChartsAxis-tickLabel, & .MuiChartsAxis-left .MuiChartsAxis-tickLabel, & .MuiChartsAxis-right .MuiChartsAxis-tickLabel': {
     fill: '#9ca3af',
-    fontSize: 12,
+    fontSize: isMobile ? '10px' : '12px',
   },
   '& .MuiChartsGrid-vertical line': { stroke: 'transparent' },
   '& .MuiChartsGrid-horizontal line': {
@@ -26,7 +26,7 @@ const getChartSx = (isDarkMode) => ({
   },
   '& .MuiChartsLegend-label': {
     fill: isDarkMode ? '#d1d5db' : '#6b7280',
-    fontSize: '12px !important',
+    fontSize: isMobile ? '10px !important' : '12px !important',
   },
 });
 
@@ -71,7 +71,19 @@ const EmptyState = () => (
 
 const BiaxialLineChart = () => {
   const { transactions, isDarkMode } = useContext(AppContext);
-  const chartSx = useMemo(() => getChartSx(isDarkMode), [isDarkMode]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const chartSx = useMemo(() => getChartSx(isDarkMode, isMobile), [isDarkMode, isMobile]);
 
   const { labels, incomeData, expenseData } = useMemo(
     () => getMonthlySeries(transactions),
@@ -99,30 +111,30 @@ const BiaxialLineChart = () => {
   );
 
   return (
-    <div className="flex flex-col h-[300px]">
-      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
+    <div className={`flex flex-col ${isMobile ? 'h-[250px]' : 'h-[300px]'}`}>
+      <h3 className={`text-sm font-medium text-gray-500 dark:text-gray-400 ${isMobile ? 'mb-2' : 'mb-4'}`}>
         Income vs Expense
       </h3>
       <div className="flex-1 w-full">
         {labels.length > 0 ? (
           <LineChart
             series={series}
-            xAxis={[{ scaleType: 'point', data: labels, height: 28 }]}
+            xAxis={[{ scaleType: 'point', data: labels, height: isMobile ? 24 : 28 }]}
             yAxis={[
               {
                 id: 'leftAxisId',
-                width: 60,
+                width: isMobile ? 50 : 60,
                 valueFormatter: (v) => `₹${(v / 1000).toFixed(0)}k`,
               },
               {
                 id: 'rightAxisId',
                 position: 'right',
-                width: 60,
+                width: isMobile ? 50 : 60,
                 valueFormatter: (v) => `₹${(v / 1000).toFixed(0)}k`,
               },
             ]}
-            height={240}
-            margin={{ top: 10, right: 70, bottom: 20, left: 60 }}
+            height={isMobile ? 200 : 240}
+            margin={isMobile ? { top: 10, right:5, bottom: 20, left: 5 } : { top: 10, right: 10, bottom: 20, left: 10 }}
             slotProps={{ legend: { position: { vertical: 'top', horizontal: 'right' } } }}
             sx={chartSx}
           />

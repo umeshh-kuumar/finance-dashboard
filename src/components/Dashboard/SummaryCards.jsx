@@ -65,7 +65,7 @@ const SummaryCards = () => {
         <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 mt-1.5">{currentDate}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {cards.map((card, index) => (
           <div
             key={index}
@@ -79,11 +79,11 @@ const SummaryCards = () => {
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   {card.title}
                 </p>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-1">
                   {card.amount}
                 </h3>
               </div>
-              <div className={`p-3 rounded-xl ${card.bg}`}>
+              <div className={`p-2 rounded-xl ${card.bg}`}>
                 {card.icon}
               </div>
             </div>

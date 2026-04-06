@@ -68,7 +68,7 @@ const Piechart = () => {
       </h3>
 
       {categorySpendingData.length > 0 ? (
-        <div className="flex flex-row items-center w-full">
+        <div className="flex justify-around flex-row items-center  w-full gap-2">
 
           {/* ── Pie (left) ── */}
           <div className="flex-shrink-0">
@@ -95,7 +95,7 @@ const Piechart = () => {
           </div>
 
 
-          <div className="flex flex-col flex-wrap gap-y-1 gap-x-2 ml-4 max-h-52 overflow-hidden">
+          <div className="flex flex-col flex-wrap  ml-4 max-h-52 overflow-hidden">
             {categorySpendingData.map((item) => (
               <div key={item.id} className="flex items-center gap-2 min-w-[120px]">
                 <span
