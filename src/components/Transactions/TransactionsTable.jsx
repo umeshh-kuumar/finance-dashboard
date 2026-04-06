@@ -70,6 +70,33 @@ const TransactionsTable = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const exportTransactions = () => {
+    const escapeCsvValue = (value) => {
+      const stringValue = value == null ? "" : String(value);
+      return stringValue.includes(",") || stringValue.includes("\n") || stringValue.includes('"')
+        ? `"${stringValue.replace(/"/g, '""')}"`
+        : stringValue;
+    };
+
+    const headers = ["id", "date", "category", "type", "amount"];
+    const rows = transactions.map((transaction) => [
+      transaction.id,
+      transaction.date,
+      transaction.category,
+      transaction.type,
+      transaction.amount,
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((row) => row.map(escapeCsvValue).join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
+
   React.useEffect(() => {
     document.body.style.overflow = showModal ? "hidden" : "unset";
     return () => {
@@ -161,14 +188,22 @@ const TransactionsTable = () => {
             Recent Transactions
           </h2>
 
-          {role === "Admin" && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowModal(true)}
-              className="flex-shrink-0 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5 transition-all duration-300"
+              onClick={exportTransactions}
+              className="flex-shrink-0 bg-white/90 dark:bg-gray-900/90 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
             >
-              + Add Transaction
+              Export Data
             </button>
-          )}
+            {role === "Admin" && (
+              <button
+                onClick={() => setShowModal(true)}
+                className="flex-shrink-0 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5 transition-all duration-300"
+              >
+                + Add Transaction
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Search + Filter row */}
